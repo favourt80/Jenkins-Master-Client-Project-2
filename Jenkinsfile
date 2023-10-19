@@ -1,3 +1,9 @@
+def COLOR_MAP = [
+    'SUCCESS': 'good', 
+    'FAILURE': 'danger',
+    'UNSTABLE': 'danger'
+]
+
 pipeline {
   agent {
     label 'Maven-Build-Env' // Use the Maven slave node for this pipeline
@@ -47,4 +53,14 @@ pipeline {
       }
     }
   }
+
+post {
+    always {
+        echo 'Slack Notifications.'
+        slackSend channel: '#favour-jenkins-master-client-alerts', //update and provide your channel name
+        color: COLOR_MAP[currentBuild.currentResult],
+        message: "*${currentBuild.currentResult}:* Job Name '${env.JOB_NAME}' build ${env.BUILD_NUMBER} \n Build Timestamp: ${env.BUILD_TIMESTAMP} \n Project Workspace: ${env.WORKSPACE} \n More info at: ${env.BUILD_URL}"
+    }
+  }
+
 }
